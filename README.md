@@ -7,4 +7,5 @@ This working workshop aims to get some computational effort going towards Land 3
 3. User should be aware that Git is a distributed version control system and allows for greater flexibility but this also means that it is a
 good idea to spend a few minutes planning your strategy before you start cloning/coding etc.
 4. The basic premise is that you clone the https://www.github.com/PAI-SEG/SEG_3D_SPWW_2015 repository into your local Git repository.
-5. Once you are ready to check in then you merge the code back into the GitHub repository https://www.github.com/PAI-SEG/SEG_3D_SPWW_2015.
+5. Once you have the code in your local repository than you can code different scenarios and test your results etc.
+6. Once you are ready to check in then you merge the code back into the GitHub repository https://www.github.com/PAI-SEG/SEG_3D_SPWW_2015.
