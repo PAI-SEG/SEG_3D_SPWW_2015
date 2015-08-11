@@ -1,0 +1,67 @@
+# first I ran sudo port install wget
+
+# please do not run wget at workshop.  It will overload the network
+#wget http://s3.amazonaws.com/teapot/npr3_gathers.sgy
+# iline,xline are loaded into header locations fldr,grnors
+
+cat ../fetch/npr3_gathers.su \
+| sunmo \
+  tnmo=0.00,.479,.637,.792,.877,1.009,1.104,1.19458,1.615,3.010 \
+vnmo=9132.86,10553.29,10921.60,10791.97,11074.19,11649.54,11807.96,12325.03,14410.47,17216.64 \
+| sustack key=cdp \
+> stack.su
+
+echo "display stack from preprocessed gathers"
+
+<stack.su suwind key=fldr min=141 max=141 \
+| suwind  nt=1000 \
+>stack141.su
+
+<stack141.su suximage title="sustack line 141" perc=94 &
+
+
+<stack.su suwind key=grnors min=121 max=121 \
+| suwind  nt=1000 \
+>stackxl121.su
+
+<stackxl121.su suximage title="sustack xline 121" perc=94 &
+
+ 
+# iline,xline are loaded into header locations fldr,grnors
+
+<../fetch/npr3_field.su surange
+# ohh my!  Coordinates all need to be divided by 1000 to be in ft.
+# this apply to sx, sy ,cdpx, cdpy
+ 
+<../fetch/npr3_field.su  suwind count=1000 \
+| sugethw key=fldr,grnors,cdp,offset,sx,sy
+
+
+<../fetch/npr3_field.su susort cdp \
+| sugain tpow=2 \
+| sumute        \
+  tmute=0.0,4.0  \
+  xmute=0,18000 \
+  ntaper=12 \
+| sunmo \
+  tnmo=0.00,.479,.637,.792,.877,1.009,1.104,1.19458,1.615,3.010 \
+vnmo=9132.86,10553.29,10921.60,10791.97,11074.19,11649.54,11807.96,12325.03,14410.47,17216.64 \
+| sustack key=cdp \
+> fstack.su
+
+echo "display stack from unprocessed field shots"
+
+<fstack.su suwind key=fldr min=141 max=141 \
+| suwind  nt=1000 \
+>fstack141.su
+
+<fstack141.su suximage title="fstack.su line 141" perc=94 &
+
+
+<fstack.su suwind key=grnors min=121 max=121 \
+| suwind  nt=1000 \
+>stackxl121.su
+
+<stackxl121.su suximage title="fstack.su xline 121" perc=94 &
+ 
+ 

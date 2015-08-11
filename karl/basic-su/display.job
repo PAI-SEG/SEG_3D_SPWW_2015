@@ -1,0 +1,32 @@
+echo "display stack from preprocessed gathers"
+
+<stack.su suwind key=fldr min=141 max=141 \
+| suwind  nt=1000 \
+>stack141.su
+
+<stack141.su suximage title="sustack line 141" perc=94 &
+
+
+<stack.su suwind key=grnors min=121 max=121 \
+| suwind  nt=1000 \
+>stackxl121.su
+
+<stackxl121.su suximage title="sustack xline 121" perc=94 &
+
+ 
+
+echo "display stack from unprocessed field shots"
+
+<fstack.su suwind key=fldr min=141 max=141 \
+| suwind  nt=1000 \
+>fstack141.su
+
+<fstack141.su suximage title="fstack.su line 141" perc=94 &
+
+
+<fstack.su suwind key=grnors min=121 max=121 \
+| suwind  nt=1000 \
+>stackxl121.su
+
+<stackxl121.su suximage title="fstack.su xline 121" perc=94 &
+ 

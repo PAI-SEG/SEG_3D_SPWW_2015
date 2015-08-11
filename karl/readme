@@ -1,0 +1,24 @@
+Before the workshop I created simple scripts to help others to get started.
+They provide some reference inline and crossline display so evertyone can
+make comparisons at the same locations.
+
+There are madagascar and su scripts.  They assume the segy files of the 
+field and gathers are in the fetch directory.  Read comments at top of
+fetch/fetch.job.
+
+To run su scripts:
+cd fetch
+./fetch.job
+cd ../basic.su
+basic.job
+
+to redisplay results:
+display.job
+
+To run madagascar scripts:
+cd fetch
+scons view
+cd ../basic-mad
+scons view
+
+
