@@ -1,0 +1,3 @@
+uses=[]
+data=['http://s3.amazonaws.com/teapot/../../docs/3dload_Teapot_Dome_3D.pdf', 'http://s3.amazonaws.com/teapot/../../docs/teapot_processing.pdf']
+size=          0
