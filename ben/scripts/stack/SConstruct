@@ -1,0 +1,7 @@
+from rsf.proj import *
+
+# ohh my!  Coordinates all need to be divided by 1000 to be in ft.
+# this apply to sx, sy ,cdpx, cdpy
+
+    
+End()
