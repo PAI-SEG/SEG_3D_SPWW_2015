@@ -1,96 +1,21 @@
 from rsf.proj import *
 
-
-Flow(['stack.rsf','stack_hdr.rsf'],
-     ['../fetch/npr3_gathers.rsf','../fetch/npr3_gathers_hdr.rsf'],
+Flow(['gather_subset.rsf','gather_subset_hdr.rsf'],
+     ['../../fetch/npr3_gathers.rsf','../../fetch/npr3_gathers_hdr.rsf'],
      '''
-     sftahread verbose=1 input=${SOURCES[0]} 
-     | sftahnmo 
-       verbose=1  
-       tnmo=0.000,0.373,0.619,0.826,0.909,1.017,1.132,1.222,1.716,3.010 
-       vnmo=9086.27,10244.26,11085.81,10803.11,10969.02,11578.66,12252.14,12669.89,14590.08,17116.54 
-     | sftahstack key=iline,xline verbose=1 ntaper=12
+     sftahsort 
+  	input=$SOURCE 
+	sort="iline:169,181  xline:104,116 offset:0,11000" 
+        verbose=1  
+     | sftahmakeskey pkey=iline,xline skey=cdpt verbose=1
      | sftahwrite 
         verbose=1                           
-        label2="xline" o2=1 n2=188 d2=1   
-        label3="iline" o3=1 n3=345 d3=1   
-        output=${TARGETS[0]}
-        outheaders=${TARGETS[1]} 
-     ''',stdout=0,stdin=0)
+	label2="cdpt"  o2=1 n2=34  d2=1   
+        label3="xline" o3=104 n3=1 d3=1   
+        label4="iline" o4=169 n4=1  d4=1   
+        output=$TARGET
+      ''',stdout=0,stdin=0)
 
-Flow('stack141','stack','window n1=1000 n3=1 min3=141')
-Result('stack141',
-       '''
-       grey title='tahstack line 141'
-       ''')
-Flow('stackx121','stack','window n1=1000 n2=1 min2=121')
-Result('stackx121',
-       '''
-       grey title='tahstack xline 121'
-       ''')
-
-Result('stack3d','stack',
-       '''
-       window n1=1000
-       | byte gainpanel=all 
-       | grey3 title="tah stack" frame1=500 frame2=120 frame3=140
-        ''')
-
-
-
-
-
-
-# typical basic preprocessing is:
-#   gain - appoy spreading correction
-# surface consistant scaling
-#   predecon mute
-#   decon (surface consistant)
-#   spectral whitening (zero phase)
-#   relative static
-#   nmo
-#   mean static
-#   residual static (surface consistant)
-#   stack with mute
-
-Flow(['fstack.rsf','fstack_hdr.rsf'],
-     ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
-     '''
-     sftahsort verbose=1 input=${SOURCES[0]} sort='iline xline offset'
-     | sftahgain 
-       tpow=2
-     | sftahmute
-       tmute=0.0,4.0
-       xmute=0,18000 
-     | sftahnmo 
-       verbose=1  
-       tnmo=0.000,0.373,0.619,0.826,0.909,1.017,1.132,1.222,1.716,3.010 
-       vnmo=9086.27,10244.26,11085.81,10803.11,10969.02,11578.66,12252.14,12669.89,14590.08,17116.54 
-     | sftahstack key=iline,xline verbose=1 ntaper=12
-     | sftahwrite 
-        verbose=1                           
-        label2="xline" o2=1 n2=188 d2=1   
-        label3="iline" o3=1 n3=345 d3=1   
-        output=${TARGETS[0]}
-        outheaders=${TARGETS[1]} 
-     ''',stdout=0,stdin=0)
-
-Flow('fstack141','fstack','window n1=1000 n3=1 min3=141')
-Result('fstack141',
-       '''
-       grey title='tah fstack line 141'
-       ''')
-Flow('fstackx121','fstack','window n1=1000 n2=1 min2=121')
-Result('fstackx121',
-       '''
-       grey title='tah fstack xline 121'
-       ''')
-
-Result('fstack3d','fstack',
-       '''
-       window n1=1000
-       | byte gainpanel=all 
-       | grey3 title="tah fstack" frame1=500 frame2=120 frame3=140
-        ''')
+Plot('gather_subset', 'grey title="CDP gather"',view=1)
 
 End()
