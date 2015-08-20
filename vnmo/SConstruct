@@ -1,7 +1,7 @@
 from rsf.proj import *
 
 Flow(['gather_subset.rsf','gather_subset_hdr.rsf'],
-     ['../../fetch/npr3_gathers.rsf','../../fetch/npr3_gathers_hdr.rsf'],
+     ['../../data/cmp/npr3_gathers.rsf','../../data/cmp/npr3_gathers_hdr.rsf'],
      '''
      sftahsort
         input=$SOURCE
