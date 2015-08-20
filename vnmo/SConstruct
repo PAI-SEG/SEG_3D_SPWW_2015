@@ -1,0 +1,21 @@
+from rsf.proj import *
+
+Flow(['gather_subset.rsf','gather_subset_hdr.rsf'],
+     ['../../fetch/npr3_gathers.rsf','../../fetch/npr3_gathers_hdr.rsf'],
+     '''
+     sftahsort 
+  	input=$SOURCE 
+	sort="iline:169,181  xline:104,116 offset:0,11000" 
+        verbose=1  
+     | sftahmakeskey pkey=iline,xline skey=cdpt verbose=1
+     | sftahwrite 
+        verbose=1                           
+	label2="cdpt"  o2=1 n2=34  d2=1   
+        label3="xline" o3=104 n3=1 d3=1   
+        label4="iline" o4=169 n4=1  d4=1   
+        output=$TARGET
+      ''',stdout=0,stdin=0)
+
+Plot('gather_subset', 'grey title="CDP gather"',view=1)
+
+End()
