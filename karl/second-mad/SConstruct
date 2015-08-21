@@ -1,0 +1,50 @@
+from rsf.proj import *
+
+# typical basic preprocessing is:
+#   gain - appoy spreading correction
+# surface consistant scaling
+#   predecon mute
+#   decon (surface consistant)
+#   spectral whitening (zero phase)
+#   relative static
+#   nmo
+#   mean static
+#   residual static (surface consistant)
+#   stack with mute
+
+Flow(['rawshot.rsf','rawshot_hdr.rsf'],
+     ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
+     '''
+     sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,254 tracf'
+     | sftahgain 
+       tpow=2
+     | sftahwrite 
+        verbose=1                           
+        label2="tracf" o2=1 n2=1063 d2=1   
+        label3="fldr" o3=214 n3=5 d3=10   
+        output=${TARGETS[0]}
+        outheaders=${TARGETS[1]} 
+     ''',stdout=0,stdin=0)
+
+Result('rawshot',
+       '''
+       grey title='shot with tpow'
+       ''')
+Flow(['preshot.rsf','preshot_hdr.rsf'],
+     ['../fetch/npr3_gathers.rsf','../fetch/npr3_gathers_hdr.rsf'],
+     '''
+     sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,254 tracf'
+     | sftahwrite 
+        verbose=1                           
+        label2="tracf" o2=1 n2=1063 d2=1   
+        label3="fldr" o3=214 n3=5 d3=10   
+        output=${TARGETS[0]}
+        outheaders=${TARGETS[1]} 
+     ''',stdout=0,stdin=0)
+
+Result('preshot',
+       '''
+       grey title='preprocessed shot'
+       ''')
+
+End()
