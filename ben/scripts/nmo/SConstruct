@@ -1,33 +1,35 @@
-
+import os
 from rsf.proj import *
 
-Flow(['gather_subset.rsf','gather_subset_hdr.rsf'],
-     ['../../data/cmp/npr3_gathers.rsf','../../data/cmp/npr3_gathers_hdr.rsf'],
+infile = "../../data/cmp/npr3_gathers.rsf"
+output_dir = "../../processed/nmo"
+
+
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+    
+
+filebase = os.path.splitext(os.path.basename(infile))[0]
+
+outfile = os.path.join(output_dir, filebase) + '.rsf'
+outhdr = os.path.join(output_dir, filebase) + '_hdr.rsf'
+inhdr = os.path.join(os.path.dirname(infile), filebase) + '_hdr.rsf'
+
+Flow([outfile,outhdr],
+     [infile, inhdr],
      '''
-
-sftahsort
-        input=$SOURCE
-        sort="iline:169,181  xline:104,116 offset:0,11000"
-        verbose=1
-
-
-
-     sftahsort
-        input=$SOURCE
-        sort="iline:169,181  xline:104,116 offset:0,11000"
-        verbose=1
-     | sftahmakeskey pkey=iline,xline skey=cdpt verbose=1
-     | sftahwrite
-        verbose=1
-        label2="cdpt"  o2=1 n2=34  d2=1
-        label3="xline" o3=104 n3=1 d3=1
-        label4="iline" o4=169 n4=1  d4=1
-        output=$TARGET
-      ''',stdout=0,stdin=0)
-
-Plot('gather_subset', 'grey  title="Gather"',view=1)
-
-sfwiggle < gather_subset.rsf fatp=1 xmask=1 ymask=1 pclip=98. zplot=0.75 clip=0. seemean=n verb=n transp=n yreverse=n xreverse=n > plot.vpl
+     sftahread verbose=1 input=${SOURCES[0]} 
+     | sftahnmo 
+       verbose=1  
+       tnmo=0.000,0.373,0.619,0.826,0.909,1.017,1.132,1.222,1.716,3.010 
+       vnmo=9086.27,10244.26,11085.81,10803.11,10969.02,11578.66,12252.14,12669.89,14590.08,17116.54
+     | sftahmakeskey pkey=cdp skey=cdpt
+     | sftahwrite verbose=1
+        label2="cdpt" o2=1 n2=35 d2=1
+        label3="xline" o3=1 n3=188 d3=1   
+        label4="iline" o4=1 n4=345 d4=1 
+       output=${TARGETS[0]}
+       outheaders=${TARGETS[1]}
+     ''',stdout=0,stdin=0)
 
 End()
-
