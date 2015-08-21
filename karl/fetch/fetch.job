@@ -1,0 +1,38 @@
+# first I ran sudo port install wget
+# please do not run wget at workshop.  It will overload the network
+# Before attending workshop download folowing instruction at 
+# http://wiki.seg.org/wiki/TEAPOT_DOME_3D_SURVEY
+# or get a thumb drive at the workshop
+
+#wget http://s3.amazonaws.com/teapot/npr3_gathers.sgy
+# iline,xline are loaded into header locations fldr,grnors
+# these headers do not appear to be used by anyone else
+segyread tape=npr3_gathers.sgy \
+        remap=fldr,grnors byte=189l,193l \
+| segyclean \
+> npr3_gathers.su
+
+<npr3_gathers.su surange
+# ohh my!  Coordinates all need to be divided by 1000 to be in ft.
+# this apply to sx, sy ,cdpx, cdpy
+ 
+<npr3_gathers.su  suwind count=1000 \
+| sugethw key=fldr,grnors,cdp,offset,sx,sy
+
+
+# iline,xline are loaded into header locations fldr,grnors
+segyread tape=npr3_field.sgy \
+        remap=fldr,grnors byte=189l,193l \
+| segyclean \
+> npr3_field.su
+
+<npr3_field.su surange
+# ohh my!  Coordinates all need to be divided by 1000 to be in ft.
+# this apply to sx, sy ,cdpx, cdpy
+ 
+<npr3_field.su  suwind count=1000 \
+| sugethw key=fldr,grnors,cdp,offset,sx,sy
+
+
+
+ 
