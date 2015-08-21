@@ -1,0 +1,49 @@
+
+from rsf.proj import *
+
+Flow(['gather_subset.rsf','gather_subset_hdr.rsf'],
+     ['../../data/cmp/npr3_gathers.rsf','../../data/cmp/npr3_gathers_hdr.rsf'],
+     '''
+
+sftahread verbose=1 input=${SOURCES[0]}
+	      headers=${SOURCES[1]}          
+     | sftahnmo
+       verbose=1
+       tnmo=0.000,0.373,0.619,0.826,0.909,1.017,1.132,1.222,1.716,3.010
+       vnmo=9086.27,10244.26,11085.81,10803.11,10969.02,11578.66,12252.14,12669.89,14590.08,17116.54
+
+#| sftahwrite 
+#           verbose=1                           
+#           label2="xline" o2=1 n2=188 d2=1   
+#           label3="iline" o3=1 n3=345 d3=1   
+
+sftahstack key=iline,xline verbose=1
+           
+output=${TARGETS[0]} 
+outheaders=${TARGETS[1]}
+)
+            
+| sftahwrite
+        verbose=1
+        label2="offset" o2=1 n2=100 d3=1
+        label3="xline" o3=1 n3=188 d3=1
+        label4="iline" o4=1 n4=345 d4=1
+        output=${TARGETS[0]}
+        outheaders=${TARGETS[1]}
+     ''',stdout=0,stdin=0)
+
+#Plot('gather_subset', 'grey  title="Gather"',view=1)
+
+#Flow('gatherw.rsf','gather_subset', sfwiggle |sfpen)
+
+#Result('gather_subset','window j2=4 | wiggle label2=Distance unit2=km transp=y yreverse=y poly=y  title="gather" ')
+
+# Stacking
+##########
+
+#Flow('gather_nmo_stack','gather_subset','nmo velocity=${SOURCES[0]}')
+#Flow('gather_nmo_stack','gather_subset','stack')
+
+Plot('gather_subset', 'grey title="Gather_nmo_stack"',view=1)
+End()
+
