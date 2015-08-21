@@ -1,8 +1,16 @@
 from rsf.proj import *
+
+sys.path.append('.')
+import datapath
+local = datapath.local
+
 # please do not download data at the workshop.  It will overload the network
 # get the stack created using seismic unix
-#Fetch('final_stack.rsf','teapot',server='http://s3.amazonaws.com',top='')
-Plot('sustack','final_stack','grey title="SU stack"',view=1)
+final_stack = datapath.final_stack
+if not local:
+  Fetch('final_stack.rsf','teapot',server='http://s3.amazonaws.com',top='')
+  final_stack = 'final_stack.rsf'
+Plot('sustack',final_stack,'grey title="SU stack"',view=1)
 
 Result('sustack','final_stack',
        '''
@@ -12,14 +20,16 @@ Result('sustack','final_stack',
        label2=Inline label3=Crossline
        ''')
 
-#Fetch('npr3_gathers.sgy','teapot',server='http://s3.amazonaws.com',top='')
-
+npr3_gathers = datapath.npr3_gathers
+if not local:
+  Fetch('npr3_gathers.sgy','teapot',server='http://s3.amazonaws.com',top='')
+  npr3_gathers = 'npr3_gathers.sgy'
 # ohh my!  Coordinates all need to be divided by 1000 to be in ft.
 # this apply to sx, sy ,cdpx, cdpy
  
 Flow(['npr3_gathers.rsf','npr3_gathers_hdr.rsf', 
       'npr3_gathers.thdr','npr3_gathers.bhdr'],
-     'npr3_gathers.sgy',
+     npr3_gathers,
      '''
      sfsegyread tfile=${TARGETS[1]} 
      hfile=${TARGETS[2]}  bfile=${TARGETS[3]} 
@@ -29,11 +39,13 @@ Flow('gathersheaderattr.txt',
      'npr3_gathers_hdr.rsf',
      'sfheaderattr > $TARGET && /bin/cat $TARGET',stdout=-1)
 
-#Fetch('npr3_field.sgy','teapot',server='http://s3.amazonaws.com',top='')
-
+npr3_field = datapath.npr3_field
+if not local:
+  Fetch('npr3_field.sgy','teapot',server='http://s3.amazonaws.com',top='')
+  npr3_filed = 'npr3_field.sgy'
 Flow(['npr3_field.rsf','npr3_field_hdr.rsf',
       'npr3_field.thdr','npr3_field.bhdr'],
-     'npr3_field.sgy',
+     npr3_field,
      '''
      sfsegyread tfile=${TARGETS[1]} 
      hfile=${TARGETS[2]}  bfile=${TARGETS[3]} 

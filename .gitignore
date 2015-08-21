@@ -1,0 +1,12 @@
+*~
+*.sgy
+*.segy
+*.HH
+*.vpl
+*.rsf
+*.dat
+*.dbhash
+*.dblite
+*.DS_Store
+*.rsfproj
+*.sconsign

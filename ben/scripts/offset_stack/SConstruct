@@ -1,0 +1,39 @@
+import os
+from rsf.proj import *
+
+infile = "../../data/cmp/npr3_gathers.rsf"
+inhdr = "../../data/cmp/npr3_gathers_hdr.rsf"
+output_dir = "../../processed/offset_stack"
+
+offsets = [('0','3000'), ('3000','6000'), ('6000','9000')]
+
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+for stack in offsets:
+    
+    offset_string = str(stack[0]) + '_' + str(stack[1])
+    filebase = os.path.splitext(os.path.basename(infile))[0]
+    
+    output = os.path.join(output_dir, offset_string + '_' + filebase + '.rsf')
+    output_hdr = os.path.join(output_dir, offset_string + '_' + filebase + '_hdr.rsf')
+
+    Flow([output, output_hdr], [infile, inhdr],
+         """
+         sftahsort
+         input=$SOURCE
+         sort="xline:1,356  xline:1,188 offset:""" + ','.join(stack) + """"
+         | sftahnmo 
+         verbose=1  
+         tnmo=0.000,0.373,0.619,0.826,0.909,1.017,1.132,1.222,1.716,3.010 
+         vnmo=9086.27,10244.26,11085.81,10803.11,10969.02,11578.66,12252.14,12669.89,14590.08,17116.54
+         | sftahmakeskey pkey=cdp skey=cdpt
+         | sftahstack key=cdp |
+         sftahwrite
+         label2="xline" o2=1 n2=188 d2=1   \
+         label3="iline" o3=1 n3=345 d3=1   \
+         output=${TARGETS[0]}
+         outheaders=${TARGETS[1]}""", stdout=0, stdin=0)
+         
+    
+

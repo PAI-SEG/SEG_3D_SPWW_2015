@@ -2,6 +2,7 @@
 SEG 3D Seismic Processing Working Workshop Houston 2015- Land 3D
 SEG Open Seismic Processing Working Workshop - Land 3D, August 19-22, 2015
 This working workshop aims to get some computational effort going towards Land 3D processing.
+
 1. At this point the repository is a placeholder to hold the code from the different partipant groups. 
 2. Each group will create a directory/folder under PAI-SEG/SEG_3D_SPWW_2015 and store their code there.
 3. User should be aware that Git is a distributed version control system and allows for greater flexibility but this also means that it is a
