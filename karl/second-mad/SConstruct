@@ -15,7 +15,7 @@ from rsf.proj import *
 Flow(['rawshot.rsf','rawshot_hdr.rsf'],
      ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
      '''
-     sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,254 tracf'
+     sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,254,10 tracf'
      | sftahgain 
        tpow=2
      | sftahwrite 
@@ -33,7 +33,7 @@ Result('rawshot',
 Flow(['preshot.rsf','preshot_hdr.rsf'],
      ['../fetch/npr3_gathers.rsf','../fetch/npr3_gathers_hdr.rsf'],
      '''
-     sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,254 tracf'
+     sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,254,10 tracf'
      | sftahwrite 
         verbose=1                           
         label2="tracf" o2=1 n2=1063 d2=1   
@@ -46,5 +46,11 @@ Result('preshot',
        '''
        grey title='preprocessed shot'
        ''')
+Flow('preshot.txt',
+     ['../fetch/npr3_gathers.rsf','../fetch/npr3_gathers_hdr.rsf'],
+     '''
+     sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,214,10 tracf'
+     | sftahgethw key=fldr,tracf,sx,sy,gx,gy
+     ''',stdin=0)
 
 End()
