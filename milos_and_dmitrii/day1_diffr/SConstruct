@@ -1,0 +1,95 @@
+from rsf.proj import *
+
+# Just specify a path where your stack.rsf file is stored
+
+Flow('stack','../basic-mad/stack.rsf',
+	'''
+	window max1=2.5 min2=50 max2=150 max3=150 max3=250 |
+	put d2=110 d3=110
+	''')
+
+Flow('stack141','stack','window n3=1 min3=141')
+
+Result('stack141','sfgrey title="141 inline"')
+
+Flow('dip','stack','fdip rect1=10 rect2=10 rect3=10 order=3 verb=y')
+
+Flow('dip1_141','dip',
+       '''
+       window n4=1  n3=1 min3=15510
+       ''')
+       
+Flow('dip2_141','dip',
+       '''
+       window f4=1  n3=1 min3=15510
+       ''')
+Result('dip1_141','grey color=j title="dip1"')
+Result('dip2_141','grey color=j title="dip2"')
+
+#ref_pr reduce=none order=1
+#ref_pr2 order=2
+
+Flow('ref_pr2','stack dip','pwspray2 ns2=3 ns3=3 dip=${SOURCES[1]} order=2 | stack axis=2')
+
+#subtract
+
+Flow('dif','stack ref_pr2','add scale=1,-1 ${SOURCES[1]}')
+
+Result('dif141','dif','window n3=1 min3=15510 | sfgrey title="141 inline"')
+
+Result('ref141','ref_pr2','window n3=1 min3=15510 | sfgrey title="141 inline"')
+
+# Velocity continuation
+
+Flow('cosft','ref_pr2','cosft sign2=1 sign3=1')
+
+Flow('vc1st','cosft','vczo3 v0=0.0 dv=9000 nv=1 | window')
+Flow('vc','vc1st','vczo3 v0=9000 dv=1000 nv=10')
+
+#Flow('vel','data','spike mag=2000')
+
+Flow('vcmig','vc',
+     'cosft sign3=-1 sign4=-1')
+     
+Result('vcmig141','vcmig','window n4=1 min4=15510 | transp plane=23 | sfgrey title="141 inline"')
+
+#################################
+# same applied to migrated volume
+#################################
+
+# Specify the path to the cuber.rsf file as $RSFSRC/book/tccs/fpwd/teapot/
+# First you need to run scripts in that folder to download and read the data
+
+Flow('migrated_vol','/Users/dmitriimerzlikin/RSFSRC/book/tccs/fpwd/teapot/cuber.rsf',
+	'''
+	sfmath output="input"
+	''')
+
+Flow('mdip','migrated_vol','fdip rect1=10 rect2=10 rect3=10 order=3 verb=y')
+
+#Flow('mdip1_141','mdip',
+#       '''
+#       window n4=1  n3=1 min3=15510
+#       ''')
+       
+#Flow('mdip2_141','mdip',
+#       '''
+#       window f4=1  n3=1 min3=15510
+#       ''')
+#Result('mdip1_141','grey color=j title="dip1"')
+#Result('mdip2_141','grey color=j title="dip2"')
+
+#ref_pr reduce=none order=1
+#ref_pr2 order=2
+
+Flow('mref_pr2','migrated_vol mdip','pwspray2 ns2=3 ns3=3 dip=${SOURCES[1]} order=2 | stack axis=2')
+
+Flow('mdif','migrated_vol mref_pr2','add scale=1,-1 ${SOURCES[1]}')
+
+Result('mdif','sfbyte | sfgrey3 frame1=200 frame2=100 frame3=30')
+
+Result('mref','mref_pr2','sfbyte | sfgrey3 frame1=200 frame2=100 frame3=30')
+
+Result('migr','migrated_vol','sfbyte | sfgrey3 frame1=200 frame2=100 frame3=30')
+
+End()
