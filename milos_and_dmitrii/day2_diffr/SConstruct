@@ -1,0 +1,153 @@
+from rsf.proj import *
+from rsf.recipes.tpx import TPX
+
+##################################
+# Usefule plotting functions
+##################################
+
+def velplot(title,label1='Depth',unit1='km',max1=2):
+    return '''
+    window max1=%g |
+    grey color=j allpos=y title="%s" scalebar=y
+    barlabel=Velocity barunit=km/s
+    label1="%s" unit1="%s" label2=Lateral unit2=km
+    barreverse=y pclip=100 
+    ''' % (max1,title,label1,unit1)
+
+def graph(transp,o2,d2,n2,col,fat,extra=''):
+    return '''
+    window max1=2 |
+    graph transp=%d yreverse=y pad=n min2=%g max2=%g
+    plotcol=%d plotfat=%d wantaxis=n wanttitle=n %s
+    ''' % (transp,o2,o2+(n2-1)*d2,col,fat,extra)
+
+def wiggle(title):
+    return  '''
+    window max1=2 j2=2 |
+    wiggle transp=y yreverse=y poly=y 
+    title="%s" label2=Offset unit2=km zplot=0.5
+    wherexlabel=t wheretitle=b labelsz=12 titlesz=15
+    ''' % title
+    
+# Here we consider dt and dx only
+
+Flow('modl',None,
+     '''
+     spike n1=101 d1=110 n2=4
+     nsp=4 k2=1,2,3,4 mag=0.4,0.7,1,1.5
+     ''')     
+     
+Flow('unif','modl','unif2 n1=1251 d1=0.002 v00=9,10,11,12,14')
+#Result('modl','unif',velplot('Velocity Model',max1=2))
+Result('unif','put o3=1 d3=1 label1="Time" label2="Distance" unit2="ft" | sfgrey color=j mean=y title="Vel mod" scalebar=y')
+
+# make a 3D model
+
+Flow('3d_vel_mod','unif',
+	'''
+	spray axis=3 n=250 |
+	put d1=0.002 d2=110 d3=110 o1=0 o2=50 o3=1 label1="time" label2="inline" label3="xline"
+	''')
+
+# Another model
+
+Flow('mod2','unif','math output=1.5+2*x1 | put o2=50')
+
+Plot('modl','mod2',velplot('Velocity Model',max1=2))
+Plot('modla','mod1',graph(0,0,0.02,101,0,20,'scalebar=y'))
+Plot('modlb','mod1',graph(0,0,0.02,101,7,5,'scalebar=y'))
+Result('modl2','modl modla modlb','Overlay')
+
+# Lets apply structure oriented filter on the model
+
+Flow('vel_filt',['3d_vel_mod','../day1_diffr/dip.rsf'],'pwsmooth3 ns2=3 ns3=3 dip=${SOURCES[1]} bilat=y verb=y bx=0.1')
+
+Flow('tea-bilat','../day1_diffr/migrated_vol.rsf ../day1_diffr/dip.rsf',
+     'pwsmooth3 ns2=%d ns3=%d dip=${SOURCES[1]} bilat=y ax=10 bx=0.1 \
+     gauss=y verb=y'% (2,2))
+     
+Flow('vel-bilat','3d_vel_mod ../day1_diffr/dip.rsf',
+     'pwsmooth3 ns2=%d ns3=%d dip=${SOURCES[1]} bilat=y ax=10 bx=0.1 \
+     gauss=y verb=y'% (2,2))
+     
+Flow('noise','3d_vel_mod','noise rep=y')
+     
+Flow('vel-bilat2','3d_vel_mod ../day1_diffr/dip.rsf',
+     'pwsmooth3 ns2=%d ns3=%d dip=${SOURCES[1]} verb=y'% (2,2))
+     
+# Noise tests - run structure oriented filters on noise 
+
+Flow('noise-bilat2','noise ../day1_diffr/dip.rsf',
+     'pwsmooth3 ns2=%d ns3=%d dip=${SOURCES[1]} verb=y'% (3,3))
+     
+Result('noise_it1','noise-bilat2','put unit2="ft" | byte | grey3 flat=n frame1=500 frame2=50 frame3=144 point1=.6 point2=.7')     
+     
+Flow('noise-bilat4','noise-bilat2 ../day1_diffr/dip.rsf',
+     'pwsmooth3 ns2=%d ns3=%d dip=${SOURCES[1]} verb=y'% (3,3))     
+
+Result('noise_it2','noise-bilat4','put unit2="ft" | byte | grey3 flat=n frame1=500 frame2=50 frame3=144 point1=.6 point2=.7')
+
+Result('stack','../day1_diffr/stack.rsf',
+	'''
+	byte | grey3 flat=n frame1=500 frame2=50 frame3=144 point1=.6 point2=.7
+	''')
+Result('noise',
+	'''
+	byte | grey3 flat=n frame1=500 frame2=50 frame3=144 point1=.6 point2=.7
+	''')
+Result('dipinline','../day1_diffr/dip.rsf',
+	'''
+	put label2="inline" label3="xline" | 
+	window n4=1 |
+ 	byte | grey3 color=j flat=n frame1=500 frame2=50 frame3=144 point1=.6 point2=.7
+	''')
+
+Flow('vel_pr','3d_vel_mod ../day1_diffr/dip.rsf',
+	'''
+	pwspray2 ns2=3 ns3=3 dip=${SOURCES[1]} order=2 verb=y |
+	stack axis=2
+	''')
+	
+Flow('differ','3d_vel_mod vel-bilat','add scale=1,-1 ${SOURCES[1]}')
+
+# lets do 2D tests
+
+Flow('dip141','../day1_diffr/dip.rsf','window n3=1 min3=15510 n4=1')
+Result('dip141','grey color=j')
+
+Result('mod2','grey color=j')
+
+# unif is a layered velocity model 
+
+Flow('noise2d','unif','sfnoise rep=y')
+
+# make multiple iterations 
+
+#(1)
+Flow('mod2-bilat','unif dip141',
+     'pwsmooth ns=%d dip=${SOURCES[1]} verb=y'% (51))
+#(2)     
+Flow('mod2-bilat2','mod2-bilat dip141',
+     'pwsmooth ns=%d dip=${SOURCES[1]} verb=y'% (51))
+#(3)     
+Flow('mod2-bilat3','mod2-bilat2 dip141',
+     'pwsmooth ns=%d dip=${SOURCES[1]} verb=y'% (51))
+#(4)     
+Flow('mod2-bilat4','mod2-bilat3 dip141',
+     'pwsmooth ns=%d dip=${SOURCES[1]} verb=y'% (51))     
+#(5)
+Flow('mod2-bilat5','mod2-bilat4 dip141',
+     'pwsmooth ns=%d dip=${SOURCES[1]} verb=y'% (51))
+     
+# Make a movie from the files
+
+Flow('it_mov','mod2-bilat mod2-bilat2 mod2-bilat3 mod2-bilat4 mod2-bilat5',
+	'''
+	cat axis=3 ${SOURCES[1:5]} | put o3=1 d3=1 label1="Time" label2="Distance" unit2="ft"
+	''')
+	
+Result('it_mov','sfgrey color=j mean=y title="Different iterations"')
+
+Result('last_it','mod2-bilat5','grey color=j mean=y title="5th iteration" scalebar=y')
+
+End()
