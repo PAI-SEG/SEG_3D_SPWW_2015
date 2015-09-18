@@ -93,4 +93,24 @@ Result('fstack3d','fstack',
        | grey3 title="tah fstack" frame1=500 frame2=120 frame3=140
         ''')
 
+
+Flow(['onecdp.rsf','onecdp_hdr.rsf'],
+     ['../fetch/npr3_gathers.rsf','../fetch/npr3_gathers_hdr.rsf'],
+     '''
+     sftahsort verbose=1 input=${SOURCES[0]} sort='iline:141,141 xline:121,121 offset'
+     | sftahnmo 
+       verbose=1  
+       tnmo=0.000,0.373,0.619,0.826,0.909,1.017,1.132,1.222,1.716,3.010 
+       vnmo=9086.27,10244.26,11085.81,10803.11,10969.02,11578.66,12252.14,12669.89,14590.08,17116.54 
+     | sftahgethw key=iline,xline,cdp,cdpt
+     | sftahmakeskey key=iline,xline skey=cdpt verbose=1 ntaper=12
+     | sftahwrite 
+        verbose=1                           
+        label2="cdp" o2=26441 n2=1 d2=1   
+        label3="cdpt" o3=1 n3=100 d3=1   
+        output=${TARGETS[0]}
+        outheaders=${TARGETS[1]} 
+     ''',stdout=0,stdin=0)
+Result("onecdp",'window n1=1000 | sfgrey')
+
 End()
