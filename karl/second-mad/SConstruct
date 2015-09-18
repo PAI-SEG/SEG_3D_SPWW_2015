@@ -12,13 +12,14 @@ from rsf.proj import *
 #   residual static (surface consistant)
 #   stack with mute
 
-Flow('npr3_field_hdr.rsf','../fetch/npr3_field_hdr.rsf','sfcp')
-Flow('npr3_field.rsf','../fetch/npr3_field.rsf','sfwindow n1=2047')
+#Flow('npr3_field_hdr.rsf','../fetch/npr3_field_hdr.rsf','sfcp')
+#Flow('npr3_field.rsf','../fetch/npr3_field.rsf','sfwindow n1=2047')
 
 Flow(['rawshot.rsf','rawshot_hdr.rsf'],
-     ['npr3_field.rsf','npr3_field_hdr.rsf'],
+     ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
      '''
      sftahsort verbose=1 input=${SOURCES[0]} sort='fldr:214,254,10 tracf'
+     | sftahwindow ns=2047
      | sftahgain 
        tpow=2
      | sftahwrite 
@@ -33,6 +34,15 @@ Result('rawshot',
        '''
        grey title='shot with tpow'
        ''')
+
+Result('rawshotzoom','rawshot',
+       '''
+       sfwindow min1=0 max1=2 min2=440 max2=650 min3=214 max3=214 \
+       | sfgrey color=i title='shot with tpow' \
+         pclip=99.5
+       ''')
+
+
 Flow(['preshot.rsf','preshot_hdr.rsf'],
      ['../fetch/npr3_gathers.rsf','../fetch/npr3_gathers_hdr.rsf'],
      '''
@@ -73,15 +83,17 @@ Flow('preshot2.txt',
      | sftahgethw key=tracf,gx,gy,gelev
      ''',stdin=0)
 
+# kls a 40 point predecon mute leave artifacts after decon, but 80 looks OK
+
 Flow(	['agcshot.rsf','agcshot_hdr.rsf',
-	 'tahstaticshot.rsf','tahstatic_hdr.rsf'],
+	 'tahstaticshot.rsf','tahstaticshot_hdr.rsf'],
 	['rawshot.rsf','rawshot_hdr.rsf'],
      '''
      sftahsort verbose=0 input=${SOURCES[0]} sort='fldr:214,254,10 tracf'
      | sftahmute 
-       tmute=0.0,3.3 
-       xmute=0,18000 
-       ntaper=40 
+       tmute=-.200,-.050,.200,3.00 
+       xmute=0,880,1760,18000 
+       ntaper=80 
      | sftahpef 
        verbose=1 minlag=.002 maxlag=.1  pnoise=.01 mincorr=0 maxcorr=3 
      | sftahagc
@@ -108,7 +120,9 @@ Result('agcshot',
 
 Result('agcshotzoom','agcshot',
        '''
-       sfwindow min1=0 min2=250 max2=275 min3=254 max3=254 | sfwiggle title='shot with tpow, pef and agc' pclip=99.5 transp=y yreverse=y
+       sfwindow min1=0 max1=2 min2=440 max2=650 min3=214 max3=214 \
+       | sfgrey color=i title='shot with tpow, pef and agc' \
+         pclip=99.5 transp=y yreverse=y
        ''')
 
 
@@ -117,14 +131,23 @@ Result('tahstaticshot',
        grey title='shot with tpow, tahpef and tahstatic'
        ''')
 
+Result('tahstaticshotzoom','tahstaticshot',
+       '''
+       sfwindow min1=0 max1=2 min2=440 max2=650 min3=214 max3=214 \
+       | sfgrey color=i title='shot with tpow, pef agc static' \
+         pclip=99.5 transp=y yreverse=y
+       ''')
+
+
 
 
 
 
 Flow(['tpowstack141.rsf','tpowstack141_hdr.rsf'],
-     ['npr3_field.rsf','npr3_field_hdr.rsf'],
+     ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
      '''
      sftahsort verbose=1 input=${SOURCES[0]} sort='iline:141,141 xline offset'
+     | sftahwindow ns=2047
      | sftahgain 
        tpow=2
      | sftahmute 
@@ -150,9 +173,10 @@ Result('tpowstack141',
        ''')
 
 Flow(['mutepefagcstack141.rsf','mutepefagcstack141_hdr.rsf'],
-     ['npr3_field.rsf','npr3_field_hdr.rsf'],
+     ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
      '''
      sftahsort verbose=1 input=${SOURCES[0]} sort='iline:141,141 xline offset'
+     | sftahwindow ns=2047
      | sftahgain 
        tpow=2
      | sftahmute 
@@ -182,9 +206,10 @@ Result('mutepefagcstack141',
        ''')
 
 Flow(['mutepefagcstaticstack141.rsf','mutepefagcstaticstack141_hdr.rsf'],
-     ['npr3_field.rsf','npr3_field_hdr.rsf'],
+     ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
      '''
      sftahsort verbose=1 input=${SOURCES[0]} sort='iline:141,141 xline offset'
+     | sftahwindow ns=2047
      | sftahgain 
        tpow=2
      | sftahmute 
@@ -219,9 +244,10 @@ Result('mutepefagcstaticstack141',
        ''')
 
 Flow(['muteagcstaticstack141.rsf','muteagcstaticstack141_hdr.rsf'],
-     ['npr3_field.rsf','npr3_field_hdr.rsf'],
+     ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
      '''
      sftahsort verbose=1 input=${SOURCES[0]} sort='iline:141,141 xline offset'
+     | sftahwindow ns=2047
      | sftahgain 
        tpow=2
      | sftahmute 
@@ -255,11 +281,11 @@ Result('muteagcstaticstack141',
 
 
 Flow(	['mutepefagcstaticcdps.rsf','muteagcpefcdps_hdr.rsf'],
-        ['npr3_field.rsf','npr3_field_hdr.rsf'],
+        ['../fetch/npr3_field.rsf','../fetch/npr3_field_hdr.rsf'],
      '''
      sftahsort verbose=0 input=${SOURCES[0]} sort='iline:141,141 xline:170,180 offset'
+     | sftahwindow ns=2047
      | sftahmakeskey pkey=dt skey=tracl
-     | sftahgethw key=tracl
      | sftahgain 
        tpow=2
      | sftahmute 
